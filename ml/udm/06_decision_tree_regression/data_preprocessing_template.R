@@ -1,0 +1,68 @@
+# Data Preprocessing Template
+
+# Importing the dataset
+dataset = read.csv('Position_Salaries.csv')
+dataset = dataset[2:3]
+
+# Splitting the dataset into the Training set and Test set
+# install.packages('caTools')
+# library(caTools)
+# set.seed(123)
+# split = sample.split(dataset$DependentVariable, SplitRatio = 0.8)
+# training_set = subset(dataset, split == TRUE)
+# test_set = subset(dataset, split == FALSE)
+
+# Feature Scaling
+# dataset = scale(dataset)
+
+# fitting decision tree to dataser
+# install.packages('rpart')
+library(rpart)
+
+regressor = rpart(
+  formula = Salary ~.,
+  data = dataset,
+  control = rpart.control(minsplit = 1)
+)
+
+lin_reg = lm(
+  formula = Salary ~ Level,
+  data = dataset
+)
+
+# fitting svr regression to dataser
+
+
+# visualizing 
+library(ggplot2)
+x_grid = seq(min(dataset$Level), max(dataset$Level), 0.1)
+ggplot() +
+  geom_point(
+    aes(
+      x = dataset$Level,
+      y = dataset$Salary
+    ),
+    colour='red'
+  ) +
+  geom_line(
+    aes(
+      x = dataset$Level,
+      y = predict(lin_reg, newdata = dataset)
+    ),
+    colour='blue'
+  ) +
+  geom_line(
+    aes(
+      x = x_grid,
+      y = predict(regressor, newdata = data.frame(Level = x_grid))
+    ),
+    colour='green'
+  )
+
+# predicting
+y_pred1 = predict(lin_reg, newdata = data.frame(Level = 6.5))
+y_pred1 = predict(regressor, newdata = data.frame(Level = 6.5))
+# y_pred2 = predict(lin_reg2, newdata = data.frame(Level = 6.5, 
+#                                                  Level2 = 6.5^2, 
+#                                                  Level3 = 6.5^3, 
+#                                                  Level4 = 6.5^4))
