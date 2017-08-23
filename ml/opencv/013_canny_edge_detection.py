@@ -20,7 +20,7 @@ cap = cv2.VideoCapture(0)
 while 1:
   _, img = cap.read()
   img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-  img = cv2.Canny(img, 90, 100)
+  img = cv2.Canny(img, 100, 150)
 
   cv2.imshow('img', img)
   if cv2.waitKey(1) & 0xff == ord('q'):

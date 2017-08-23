@@ -48,7 +48,7 @@ while 1:
 
   img = cv2.GaussianBlur(img, (5, 5), 10)
 
-  # img = cv2.Laplacian(img, ddepth=cv2.CV_64F)
+  img = cv2.Laplacian(img, ddepth=cv2.CV_64F)
   # imgx = cv2.Sobel(img, ddepth=cv2.CV_64F, dx=1, dy=0, ksize=5)
   # imgy = cv2.Sobel(img, ddepth=cv2.CV_64F, dx=0, dy=1, ksize=5)
   # img = np.sqrt(np.square(imgx) + np.square(imgy))
