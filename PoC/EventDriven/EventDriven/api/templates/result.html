@@ -1,0 +1,29 @@
+<!doctype html>
+<head>
+    {% if refresh %}
+    <meta http-equiv="refresh" content="5" >
+    {% endif %}
+</head>
+<html>
+   <body>
+        <h1>Results</h1>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul style="color: red;">
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+        <a href="/">[Home]</a>
+        <a href="/add-file">[Insert one record]</a>
+        <a href="/clear">[Clear data]</a>
+        <h2>{{ count }} records</h2>
+        <ul>
+        {% for item in results %}
+        <li>{{ item }}</li>  
+        {% endfor %}
+        </ul>
+   </body>
+</html>
