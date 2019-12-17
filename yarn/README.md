@@ -1,0 +1,50 @@
+### [20191712] yarn application stuck at NEW_SAVING state
+* Version 3.1.1
+* According to [this blog post](http://www.jadejaber.com/articles/yarn-application-submit-steps-and-status/). The issue may happened when the RM is trying to save the application to the state store.
+* When take a look at the source code of the [ResourceManager.java](https://github.com/apache/hadoop/blob/release-3.1.1-RC0/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-resourcemanager/src/main/java/org/apache/hadoop/yarn/server/resourcemanager/ResourceManager.java) I saw these piece of code:
+```java
+  @Private
+  private class RMFatalEventDispatcher implements EventHandler<RMFatalEvent> {
+    @Override
+    public void handle(RMFatalEvent event) {
+      LOG.error("Received " + event);
+
+      if (HAUtil.isHAEnabled(getConfig())) {
+        // If we're in an HA config, the right answer is always to go into
+        // standby.
+        LOG.warn("Transitioning the resource manager to standby.");
+        handleTransitionToStandByInNewThread();
+      } else {
+        // If we're stand-alone, we probably want to shut down, but the if and
+        // how depends on the event.
+        switch(event.getType()) {
+        case STATE_STORE_FENCED:
+          LOG.fatal("State store fenced even though the resource manager " +
+              "is not configured for high availability. Shutting down this " +
+              "resource manager to protect the integrity of the state store.");
+          ExitUtil.terminate(1, event.getExplanation());
+          break;
+        case STATE_STORE_OP_FAILED:
+          if (YarnConfiguration.shouldRMFailFast(getConfig())) {
+            LOG.fatal("Shutting down the resource manager because a state " +
+                "store operation failed, and the resource manager is " +
+                "configured to fail fast. See the yarn.fail-fast and " +
+                "yarn.resourcemanager.fail-fast properties.");
+            ExitUtil.terminate(1, event.getExplanation());
+          } else {
+            LOG.warn("Ignoring state store operation failure because the " +
+                "resource manager is not configured to fail fast. See the " +
+                "yarn.fail-fast and yarn.resourcemanager.fail-fast " +
+                "properties.");
+          }
+          break;
+        default:
+          LOG.fatal("Shutting down the resource manager.");
+          ExitUtil.terminate(1, event.getExplanation());
+        }
+      }
+    }
+  }
+```
+* It meant that with out HA and fail-fast enabled, yarn will ignore the error and our application will be stucked FOREVER at the NEW_SAVING state
+* Recommendation: ALWAYS ENABLE HA FOR RM
